@@ -13,10 +13,12 @@ class PostItAI:
 
     def __init__(self):
         """Init class"""
-        logging.basicConfig(encoding='utf-8', level=logging.INFO)
+        logging.basicConfig(encoding="utf-8", level=logging.INFO)
         self.logger = logging.getLogger("Post-IT-AI")
         self.cfg = Config().get_config()
-        self.newsapi = NewsCatcherApiClient(x_api_key=self.cfg.get("NEWSCATCHER_API_KEY"))
+        self.newsapi = NewsCatcherApiClient(
+            x_api_key=self.cfg.get("NEWSCATCHER_API_KEY")
+        )
         self.open_ai_chat = OpenAIChat(model=self.cfg.get("CHAT_GPT_MODEL"))
 
     def run_app(self, news_query=None):

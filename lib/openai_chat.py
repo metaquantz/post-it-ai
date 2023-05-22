@@ -1,5 +1,7 @@
 """Open AI Chat"""
 import openai
+from openai.error import RateLimitError
+from exceptions import OpenAIError, NoResponseError
 
 
 class OpenAIChat:
@@ -7,33 +9,42 @@ class OpenAIChat:
 
     def __init__(self, model):
         """Init chat"""
+        self._messages = [
+            {"role": "system", "content": "Welcome to Post IT AI."},
+        ]
         self.chat_responses = []
-        response = self.chat = openai.ChatCompletion.create(
-            model=model,
-            messages=[
-                {"role": "system", "content": "Welcome to Post IT AI."},
-            ],
-        )
-        self.chat_responses.append(response)
+        self.errors = []
+        self.model = model
+        try:
+            chat_response = openai.ChatCompletion.create(
+                model=model,
+                messages=self._messages,
+            )
+            self.chat_responses.append(chat_response)
+        except RateLimitError:
+            self.errors.append(OpenAIError)
 
     @staticmethod
     def create_message_payload(messages, system=False):
         """Create message payload"""
         role = "system" if system else "user"
-        payload_message = [
-            {
-                "role": role,
-                "content": message
-            } for message in messages
-        ]
+        if type(messages) == list:
+            payload_message = [
+                {"role": role, "content": message} for message in messages
+            ]
+        else:
+            payload_message = [{"role": role, "content": messages}]
         return payload_message
 
     def chat(self, messages):
-        """Chat class"""
+        """Chat method"""
         formatted_messages = self.create_message_payload(messages)
-        chat_response = self.chat.append(formatted_messages)
+        chat_response = openai.ChatCompletion.create(
+            model=self.model,
+            messages=formatted_messages
+        )
         self.chat_responses.append(chat_response)
-        return chat_response
+        return self.get_choices_from_response(chat_response)
 
     def get_latest_response(self) -> object | None:
         """Get the latest response"""
@@ -46,11 +57,28 @@ class OpenAIChat:
         """Get responses for the class"""
         return self.chat_responses
 
+    def get_choices_from_response(self, chat_gpt_response):
+        """Get choice content"""
+        if not chat_gpt_response:
+            raise NoResponseError
+        choices = chat_gpt_response.get("choices")
+        chat_gpt_messages = []
+        for choice in choices:
+            message = choice.message.content
+            role = choice.message.role
+            self._messages.append({
+                "role": role,
+                "content": message,
+            })
+            chat_gpt_messages.append(message)
+        return chat_gpt_messages
+
 
 if __name__ == "__main__":
     from util.get_config import Config
+
     cfg = Config().get_config()
     chat_model = cfg.get("CHAT_GPT_MODEL")
     open_ai_chat = OpenAIChat(chat_model)
-    response = open_ai_chat.chat("Tell me a fairy tale story for my kid")
-    print(response)
+    responses = open_ai_chat.chat("Tell me a fairy tale story for my kid")
+    print(responses)
