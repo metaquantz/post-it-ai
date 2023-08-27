@@ -2,6 +2,7 @@
 import openai
 from openai.error import RateLimitError
 from exceptions import OpenAIError, NoResponseError
+from util.get_config import Config
 
 
 class OpenAIChat:
@@ -15,6 +16,8 @@ class OpenAIChat:
         self.chat_responses = []
         self.errors = []
         self.model = model
+        self.cfg = Config().get_config()
+        openai.api_key = self.cfg.get("OPENAI_API_KEY")
         try:
             chat_response = openai.ChatCompletion.create(
                 model=model,
@@ -40,8 +43,7 @@ class OpenAIChat:
         """Chat method"""
         formatted_messages = self.create_message_payload(messages)
         chat_response = openai.ChatCompletion.create(
-            model=self.model,
-            messages=formatted_messages
+            model=self.model, messages=formatted_messages
         )
         self.chat_responses.append(chat_response)
         return self.get_choices_from_response(chat_response)
@@ -66,17 +68,17 @@ class OpenAIChat:
         for choice in choices:
             message = choice.message.content
             role = choice.message.role
-            self._messages.append({
-                "role": role,
-                "content": message,
-            })
+            self._messages.append(
+                {
+                    "role": role,
+                    "content": message,
+                }
+            )
             chat_gpt_messages.append(message)
         return chat_gpt_messages
 
 
 if __name__ == "__main__":
-    from util.get_config import Config
-
     cfg = Config().get_config()
     chat_model = cfg.get("CHAT_GPT_MODEL")
     open_ai_chat = OpenAIChat(chat_model)
