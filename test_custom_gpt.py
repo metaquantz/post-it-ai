@@ -10,7 +10,7 @@ from langchain import OpenAI
 import gradio as gr
 import os
 
-os.environ["OPENAI_API_KEY"] = "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"
+os.environ["OPENAI_API_KEY"] = "apikey"
 
 
 def construct_index(directory_path):
