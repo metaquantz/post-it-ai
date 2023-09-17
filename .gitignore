@@ -5,3 +5,5 @@ poetry.lock
 __pycache__
 docs
 *.json
+.DS_Store
+*.pyc

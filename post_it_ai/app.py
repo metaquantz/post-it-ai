@@ -2,11 +2,9 @@
 
 import logging
 import json
-from newscatcherapi import NewsCatcherApiClient
 from newsapi import NewsApiClient
-from lib.openai_chat import OpenAIChat
-from util.get_config import Config
-from util.response import API_RESPONSE
+from post_it_ai.lib.openai_chat import OpenAIChat
+from post_it_ai.util.get_config import Config
 
 
 class PostItAI:
@@ -17,11 +15,8 @@ class PostItAI:
         logging.basicConfig(encoding="utf-8", level=logging.INFO)
         self.logger = logging.getLogger("Post-IT-AI")
         self.cfg = Config().get_config()
-        # self.newsapi = NewsCatcherApiClient(
-        #     x_api_key=self.cfg.get("NEWSCATCHER_API_KEY")
-        # )
         self.newsapi = NewsApiClient(api_key=self.cfg.get("NEWSAPI_KEY"))
-        self.open_ai_chat = OpenAIChat(model=self.cfg.get("CHAT_GPT_MODEL"))
+        # self.open_ai_chat = OpenAIChat(model=self.cfg.get("CHAT_GPT_MODEL"))
 
     def run_app(self, news_query=None):
         """Run app"""
@@ -33,8 +28,6 @@ class PostItAI:
         news_articles = self.newsapi.get_everything(
             q=news_query, language="en", sort_by="relevancy"
         )
-
-        # news_articles = API_RESPONSE
 
         json_result = json.dumps(news_articles, sort_keys=True, indent=4)
 

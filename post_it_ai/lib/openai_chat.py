@@ -1,8 +1,8 @@
 """Open AI Chat"""
 import openai
 from openai.error import RateLimitError
-from exceptions import OpenAIError, NoResponseError
-from util.get_config import Config
+from post_it_ai.util.exceptions import OpenAIError, NoResponseError
+from post_it_ai.util.get_config import Config
 
 
 class OpenAIChat:

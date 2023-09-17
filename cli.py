@@ -1,6 +1,6 @@
 """Post It AI Init"""
 import click
-from app import PostItAI
+from post_it_ai.app import PostItAI
 
 
 @click.command()
